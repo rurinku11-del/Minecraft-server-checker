@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: minecraft-watchdog
+    runtime: python
+
+    buildCommand: pip install -r requirements.txt
+
+    startCommand: gunicorn bot:app
+
+    envVars:
+      - key: SERVER_HOST
+        value: Dreamworld-Cr8M.aternos.me
+
+      - key: SERVER_PORT
+        value: "52525"
+
+      - key: CHECK_INTERVAL
+        value: "60"
+
+      - key: DISCORD_WEBHOOK
+        sync: false
