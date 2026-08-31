@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Minecraft Watchdog</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #101114;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 600px;
+        }
+
+        .card {
+            background: #191b20;
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 10px 35px rgba(0,0,0,.35);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 28px;
+        }
+
+        .server {
+            color: #aaa;
+            margin-bottom: 25px;
+            word-break: break-all;
+        }
+
+        .status {
+            padding: 18px;
+            border-radius: 14px;
+            background: #22242a;
+            margin-bottom: 18px;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .online {
+            background: #32d583;
+        }
+
+        .offline {
+            background: #ff4d4d;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .box {
+            background: #22242a;
+            padding: 18px;
+            border-radius: 14px;
+        }
+
+        .label {
+            color: #999;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        .value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        #error {
+            color: #ff7777;
+            margin-top: 15px;
+            font-size: 13px;
+            word-break: break-word;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>🎮 Minecraft Watchdog</h1>
+
+        <div class="server">
+            {{ host }}:{{ port }}
+        </div>
+
+        <div class="status">
+
+            <span id="dot"
+                  class="dot offline"></span>
+
+            <span id="status">
+                Checking...
+            </span>
+
+        </div>
+
+        <div class="grid">
+
+            <div class="box">
+
+                <div class="label">
+                    Players
+                </div>
+
+                <div class="value"
+                     id="players">
+                    -
+                </div>
+
+            </div>
+
+            <div class="box">
+
+                <div class="label">
+                    Ping
+                </div>
+
+                <div class="value"
+                     id="ping">
+                    -
+                </div>
+
+            </div>
+
+            <div class="box">
+
+                <div class="label">
+                    Checks
+                </div>
+
+                <div class="value"
+                     id="checks">
+                    -
+                </div>
+
+            </div>
+
+            <div class="box">
+
+                <div class="label">
+                    Failures
+                </div>
+
+                <div class="value"
+                     id="failures">
+                    -
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="error"></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+async function updateStatus() {
+
+    try {
+
+        const response =
+            await fetch("/api/status");
+
+        const data =
+            await response.json();
+
+        const dot =
+            document.getElementById("dot");
+
+        const status =
+            document.getElementById("status");
+
+        if (data.online) {
+
+            dot.className =
+                "dot online";
+
+            status.textContent =
+                "ONLINE";
+
+        } else {
+
+            dot.className =
+                "dot offline";
+
+            status.textContent =
+                "OFFLINE";
+
+        }
+
+        document.getElementById("players")
+            .textContent =
+            data.online
+                ? `${data.players}/${data.max_players}`
+                : "-";
+
+        document.getElementById("ping")
+            .textContent =
+            data.latency !== null
+                ? `${data.latency} ms`
+                : "-";
+
+        document.getElementById("checks")
+            .textContent =
+            data.checks;
+
+        document.getElementById("failures")
+            .textContent =
+            data.failures;
+
+        document.getElementById("error")
+            .textContent =
+            data.error || "";
+
+    } catch (error) {
+
+        document.getElementById("status")
+            .textContent =
+            "WATCHDOG ERROR";
+
+    }
+
+}
+
+
+updateStatus();
+
+setInterval(
+    updateStatus,
+    10000
+);
+
+</script>
+
+</body>
+</html>
